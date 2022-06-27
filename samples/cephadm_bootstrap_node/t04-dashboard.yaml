@@ -1,0 +1,16 @@
+---
+
+- name: Test-04 'cephadm_bootstrap' module
+  hosts: localhost
+  gather_facts: false
+  become: true
+  any_errors_fatal: true
+
+  tasks:
+    - name: Bootstrap with dashboard set to `true` without username parameter
+      cephadm_bootstrap:
+        mon_ip: MON_IP
+        dashboard: true
+        dashboard_password: admin
+        monitoring: false
+        firewalld: false

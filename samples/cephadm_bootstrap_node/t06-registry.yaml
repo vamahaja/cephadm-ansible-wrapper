@@ -1,0 +1,18 @@
+---
+
+# sudo cephadm bootstrap --mon-ip <mon-ip> \
+#           --registry-url <url>  --registry-username <username> --registry-password <password>
+
+- name: Test-05 'cephadm_bootstrap' module
+  hosts: localhost
+  gather_facts: false
+  become: true
+  any_errors_fatal: true
+  tasks:
+    - name: Bootstrap with json input with invalid path
+      cephadm_bootstrap:
+        mon_ip: MON_IP
+        dashboard: false
+        monitoring: false
+        firewalld: false
+        registry_json: invalid-REGISTRY_JSON

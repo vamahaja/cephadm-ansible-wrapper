@@ -1,0 +1,13 @@
+---
+
+- name: Test-02 'cephadm_bootstrap' module
+  hosts: localhost
+  gather_facts: false
+  become: true
+  any_errors_fatal: true
+  tasks:
+    - name: Bootstrap without monitoring option (default)
+      cephadm_bootstrap:
+        mon_ip: MON_IP
+        dashboard: false
+        firewalld: false
