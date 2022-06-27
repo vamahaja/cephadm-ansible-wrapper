@@ -1,0 +1,12 @@
+---
+
+- name: Test-02 'ceph_orch_host' module
+  hosts: localhost
+  gather_facts: false
+  become: true
+  any_errors_fatal: true
+  tasks:
+    - name: Add host node with default values with invalid hostname
+      ceph_orch_host:
+        name: INVALID_MON_HOSTNAME
+        address: MON_IP_ADDRESS
