@@ -1,0 +1,15 @@
+---
+
+- name: Test-02 'cephadm_bootstrap' module
+  hosts: localhost
+  gather_facts: false
+  become: true
+  any_errors_fatal: true
+  tasks:
+    - name: Bootstrap with valid ssh_user
+      cephadm_bootstrap:
+        mon_ip: MON_IP
+        dashboard: false
+        monitoring: false
+        firewalld: false
+        ssh_user: invalid-admin
