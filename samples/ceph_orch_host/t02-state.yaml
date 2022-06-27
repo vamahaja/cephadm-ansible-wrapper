@@ -1,0 +1,13 @@
+---
+
+- name: Test-02 'ceph_orch_host' module
+  hosts: localhost
+  gather_facts: false
+  become: true
+  any_errors_fatal: true
+  tasks:
+    - name: Drain host node with valid hostname and IP Address
+      ceph_orch_host:
+        name: MON_HOSTNAME
+        address: MON_IP_ADDRESS
+        state: drain

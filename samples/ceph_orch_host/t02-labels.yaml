@@ -1,0 +1,16 @@
+---
+
+- name: Test-02 'ceph_orch_host' module
+  hosts: localhost
+  gather_facts: false
+  become: true
+  any_errors_fatal: true
+  tasks:
+    - name: Add host node with multiple labels
+      ceph_orch_host:
+        name: MON_HOSTNAME
+        address: MON_IP_ADDRESS
+        labels:
+          - TestSingleLabel-1
+          - TestSingleLabel-2
+          - TestSingleLabel-3

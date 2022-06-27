@@ -1,0 +1,13 @@
+---
+
+- name: Test-02 'ceph_orch_host' module
+  hosts: localhost
+  gather_facts: false
+  become: true
+  any_errors_fatal: true
+  tasks:
+    - name: Add host node with `set_admin_label` to `false`
+      ceph_orch_host:
+        name: MON_HOSTNAME
+        address: MON_IP_ADDRESS
+        set_admin_label: false
