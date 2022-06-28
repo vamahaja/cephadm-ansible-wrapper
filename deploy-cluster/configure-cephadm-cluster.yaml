@@ -1,0 +1,58 @@
+---
+- name: Configure cephadm cluster
+  hosts: bootstrap
+  gather_facts: false
+  become: true
+  any_errors_fatal: true
+  tasks:
+    - name: Set cluster details
+      set_fact:
+        bootstrap_node: "{{ hostvars['localhost']['groups']['bootstrap'][0] }}"
+        osd_nodes: "{{ hostvars['localhost']['groups']['osds'] }}"
+        mon_nodes: "{{ hostvars['localhost']['groups']['mons'] }}"
+        mgr_nodes: "{{ hostvars['localhost']['groups']['mgrs'] }}"
+        ceph_nodes: "{{ hostvars['localhost']['groups']['ceph'] }}"
+
+    - name: Initialize bootstrap node
+      cephadm_bootstrap:
+        mon_ip: "{{ hostvars[bootstrap_node]['ansible_ssh_host'] }}"
+        image: "{{ bootstrap_image }}"
+        monitoring: "{{ set_monitor }}"
+        dashboard: "{{ set_dashboard }}"
+        firewalld: "{{ set_firewalld }}"
+
+    - name: Copy ceph autherized keys
+      authorized_key:
+        user: root
+        key: "{{ lookup('file', '/etc/ceph/ceph.pub') }}"
+        state: present
+      delegate_to: "{{ item }}"
+      loop: "{{ ceph_nodes }}"
+
+    - name: Add hosts
+      ceph_orch_host:
+        name: "{{ item }}"
+        address: "{{ hostvars[item]['ansible_ssh_host'] }}"
+      with_items: "{{ ceph_nodes }}"
+
+    - name: Add host labels
+      ceph_orch_host:
+        name: "{{ item.0 }}"
+        address: "{{ hostvars[item.0]['ansible_ssh_host'] }}"
+        labels:
+          - "osd.{{ item.1 }}"
+      with_together:
+        - "{{ osd_nodes }}"
+        - "{{ range(0, osd_nodes | length) | list }}"
+      ignore_errors: yes
+
+    - name: Add OSDs
+      ceph_orch_apply:
+        spec: |
+          service_type: osd
+          service_id: osd_spec_default
+          placement:
+            hosts: {{ osd_nodes }}
+          data_devices:
+            paths:
+              - "{{ common_device_path }}"

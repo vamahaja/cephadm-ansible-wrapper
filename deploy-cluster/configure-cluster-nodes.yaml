@@ -1,0 +1,108 @@
+---
+- name: Configure cluster nodes
+  hosts: all
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Register system using Red Hat Subscription Manager
+      redhat_subscription:
+        server_hostname: "{{ subscription_server }}"
+        rhsm_baseurl: "{{ subscription_baseurl }}"
+        username: "{{ subscription_user }}"
+        password: "{{ subscription_pass }}"
+        state: present
+      register: subscription_results
+      until: subscription_results is success
+      retries: 5
+      delay: 3
+
+    - name: Disable all RHSM repositories
+      rhsm_repository:
+        name: '*'
+        state: disabled
+
+    - name: Enable a commmon repositories
+      rhsm_repository:
+        name: "{{ item }}"
+        state: enabled
+      with_items:
+        - rhel-8-for-x86_64-baseos-rpms
+        - rhel-8-for-x86_64-appstream-rpms
+      when:  enable_common_repos
+
+    - name: Run yum update command
+      shell: "dnf update -y"
+
+    - name: Install common packages
+      yum:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - yum-utils
+        - vim
+        - sshpass
+      when: install_common_packages
+
+    - name: Install `Podman`
+      yum:
+        name: podman
+        state: present
+      when: install_podman
+
+    - name: Start `Podman` service
+      systemd:
+        state: started
+        name: podman
+      when: install_podman
+
+    - name: Enable a commmon rhsm_repositories
+      rhsm_repository:
+        name: rhceph-4-tools-for-rhel-8-x86_64-rpms
+        state: enabled
+      when: enable_ceph_repos
+
+    - name: Login to podman
+      shell: "podman login --username {{ podman_username }} --password {{ podman_password }} {{ podman_repo_url }}"
+      when:
+        - install_podman
+        - login_podman_repo
+
+    - name: Download CA trust certificate
+      get_url:
+        url: "{{ http_root_ca_trust_cert }}"
+        dest: /etc/pki/ca-trust/source/anchors/Red_Hat_IT_Root_CA.crt
+
+    - name: Update CA trust certificate
+      shell: update-ca-trust
+
+- name: Configure bootstrap node
+  hosts: bootstrap
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Enable a commmon rhsm_repositories
+      rhsm_repository:
+        name: ansible-2.9-for-rhel-8-x86_64-rpms
+        state: enabled
+      when: enable_ceph_repos
+
+    - name: Add repository
+      yum_repository:
+        name: ceph-5-x-rhel-8-repo
+        description: Ceph 5.x RHEL8 Repo
+        baseurl: "{{ downstream_cephadm_repo }}"
+        gpgcheck: no
+
+    - name: Install 'cephadm'
+      yum:
+        name: cephadm
+        state: present
+
+    - name: Check cephadm version
+      shell: cephadm version
+
+    - name: Install 'cephadm-ansible'
+      yum:
+        name: cephadm-ansible
+        state: present
+      when: install_cephadm_ansible
