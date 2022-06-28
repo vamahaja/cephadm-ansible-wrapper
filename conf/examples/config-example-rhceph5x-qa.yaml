@@ -1,0 +1,71 @@
+[all:vars]
+# Subscription manager details
+subscription_server=subscription.foo.bar
+subscription_baseurl=https://cdn.redhat.com
+subscription_user=foo@bar.quuz
+subscription_pass=FooPassword
+
+# Subscription manager repos
+enable_common_repos=true
+enable_ceph_repos=true
+
+# Flag to install common packages
+install_common_packages=true
+
+# Root CA trust certificate
+http_root_ca_trust_cert=https://foo.bar.com/IT-root-ca.crt
+
+# Podman repo login details
+install_podman=true
+login_podman_repo=true
+podman_repo_url=fodman.foo.bar
+podman_username=foo@bar.quuz
+podman_password=FooPassword
+
+[bootstrap:vars]
+# Downstream cephadm repo and images
+downstream_cephadm_repo=https://foo.bar.com/latest-RHCEPH-5-RHEL-8
+bootstrap_image=foo.bar.io/rhceph:ceph-5.2-rhel-8-contaners-latest
+
+# cephadm ansible configs
+install_cephadm_ansible=true
+
+# Bootstrap node configurations
+set_firewalld=false
+set_monitor=false
+set_dashboard=false
+
+# Common device disk path
+common_device_path=/dev/sdb
+
+[ceph:children]
+bootstrap
+osds
+mons
+mgrs
+grafana_server
+
+[bootstrap]
+rhceph5x-5node-0 ansible_ssh_host=192.168.x.x
+
+[osds]
+rhceph5x-5node-0 ansible_ssh_host=192.168.x.x devices="['/dev/sdb']"
+rhceph5x-5node-1 ansible_ssh_host=192.168.x.x devices="['/dev/sdb']"
+rhceph5x-5node-2 ansible_ssh_host=192.168.x.x devices="['/dev/sdb']"
+rhceph5x-5node-3 ansible_ssh_host=192.168.x.x devices="['/dev/sdb']"
+rhceph5x-5node-4 ansible_ssh_host=192.168.x.x devices="['/dev/sdb']"
+
+[mons]
+rhceph5x-5node-0 ansible_ssh_host=192.168.x.x
+rhceph5x-5node-1 ansible_ssh_host=192.168.x.x
+rhceph5x-5node-2 ansible_ssh_host=192.168.x.x
+
+[mgrs]
+rhceph5x-5node-3 ansible_ssh_host=192.168.x.x
+rhceph5x-5node-4 ansible_ssh_host=192.168.x.x
+
+[grafana_server]
+rhceph5x-5node-0 ansible_ssh_host=192.168.x.x
+
+[clients]
+rhceph5x-client-0 ansible_ssh_host=192.168.x.x
