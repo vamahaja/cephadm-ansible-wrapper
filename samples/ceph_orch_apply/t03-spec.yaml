@@ -1,0 +1,19 @@
+---
+
+- name: Test-03 'ceph_orch_apply' module
+  hosts: localhost
+  gather_facts: false
+  become: true
+  any_errors_fatal: true
+
+  tasks:
+    - name: Add OSDs with host_pattern having regex
+      ceph_orch_apply:
+        spec: |
+          service_type: osd
+          service_id: osd_spec_default
+          placement:
+            host_pattern: '*5node-[0-4]'
+          data_devices:
+            paths:
+              - "/dev/sdb"

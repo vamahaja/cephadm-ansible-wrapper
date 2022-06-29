@@ -1,0 +1,22 @@
+---
+
+- name: Test-04 'ceph_orch_apply' module
+  hosts: localhost
+  gather_facts: false
+  become: true
+  vars:
+    osd_nodes: ["rhceph5x-5node-0", "rhceph5x-5node-1", "rhceph5x-5node-2", "rhceph5x-5node-3", "rhceph5x-5node-4"]
+  any_errors_fatal: true
+
+  tasks:
+    - name: Add OSDs with host list
+      ceph_orch_apply:
+        spec: |
+          service_type: osd
+          service_id: osd_spec_default
+          placement:
+            hosts: {{ osd_nodes }}
+          labels: "osds"
+          data_devices:
+            paths:
+              - "/dev/sdb"

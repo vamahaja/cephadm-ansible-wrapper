@@ -1,0 +1,19 @@
+---
+
+- name: Test-02 'ceph_orch_apply' module
+  hosts: localhost
+  gather_facts: false
+  become: true
+  any_errors_fatal: true
+
+  tasks:
+    - name: Add OSDs with host_pattern for all nodes
+      ceph_orch_apply:
+        spec: |
+          service_type: osd
+          service_id: osd_spec_default
+          placement:
+            host_pattern: '*'
+          data_devices:
+            paths:
+              - "/dev/sdb"
