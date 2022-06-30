@@ -1,0 +1,12 @@
+---
+- name: Test-05 `ceph_orch_daemon` module
+  hosts: bootstrap
+  gather_facts: false
+  become: true
+  any_errors_fatal: true
+  tasks:
+    - name: restart `mon` service
+      ceph_orch_daemon:
+        state: restarted
+        daemon_id: DAEMON_ID
+        daemon_type: mon
