@@ -1,0 +1,13 @@
+---
+- name: Test-01 `ceph_config` module 
+  hosts: bootstrap
+  gather_facts: false
+  become: true
+  any_errors_fatal: true
+  tasks:
+    - name: Set ceph config `osd_memory_target_autotune` on `osd` with `true`
+      ceph_config:
+        action: set
+        who: osd
+        option: osd_memory_target_autotune
+        value: true
