@@ -20,6 +20,12 @@
         monitoring: "{{ set_monitor }}"
         dashboard: "{{ set_dashboard }}"
         firewalld: "{{ set_firewalld }}"
+      register: bootstrap_node_details
+
+    - name: Display results in case `dashboard` is set to `true`
+      debug:
+        msg: "{{ bootstrap_node_details }}"
+      when: set_dashboard
 
     - name: Copy ceph autherized keys
       authorized_key:
